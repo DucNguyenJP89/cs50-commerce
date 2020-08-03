@@ -12,7 +12,7 @@ class Categories(models.Model):
         return f"{self.name}"
 
 class ListingPage(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='username', related_name='listinguser')
+    user = models.CharField(max_length=64)
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=200)
     startbids = models.IntegerField()
