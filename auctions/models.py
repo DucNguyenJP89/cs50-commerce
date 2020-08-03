@@ -12,6 +12,7 @@ class Categories(models.Model):
         return f"{self.name}"
 
 class ListingPage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='username', related_name='listinguser')
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=200)
     startbids = models.IntegerField()
@@ -19,5 +20,5 @@ class ListingPage(models.Model):
     category = models.ForeignKey(Categories, blank=True, null=True, on_delete=models.CASCADE, related_name='listingtype')
 
     def __str__(self):
-        return f"{self.title} at {self.startbids} usd"
+        return f"{self.title} at {self.startbids} usd by {self.user}"
     

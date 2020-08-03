@@ -6,6 +6,7 @@
     <ul>
         {% for item in listings %}
         <img src="{{ item.imageurl }}" alt="item image">
+        <li>Listed by: {{ item.user }}</li>
         <li>Item: {{ item.title }}</li>
         <li>Price: {{ item.startbids }} USD</li>
         <li>Category: {{ item.category }}</li>
