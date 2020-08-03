@@ -14,6 +14,38 @@ def index(request):
         "listings": ListingPage.objects.all()
     })
 
+class NewListing(ModelForm):
+
+    class Meta:
+        model = ListingPage
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+        self.fields['user'].initial = self.user
+
+@login_required(login_url='login')
+def new_listing(request):
+
+    form = NewListing(user=request.user)
+
+    if request.method == 'POST':
+        form = NewListing(request.POST, user=request.user)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            return render(request, "auctions/new_listing.html", {
+                'form': form,
+                'error_message': "Cannot create new listing. Please try again."
+            })
+    return render(request, "auctions/new_listing.html", {
+                'form': form
+    })
+
+
 def login_view(request):
     if request.method == "POST":
 
