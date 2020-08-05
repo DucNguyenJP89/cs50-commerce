@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm
 
-from .models import User, ListingPage
+from .models import User, ListingPage, Biddings
 
 @login_required(login_url='login')
 def index(request):
@@ -43,6 +43,19 @@ def new_listing(request):
             })
     return render(request, "auctions/new_listing.html", {
                 'form': form
+    })
+
+@login_required(login_url='login')
+def listing(request, listing_id):
+    user = request.user
+    listing = ListingPage.objects.get(id=listing_id)
+    biddings = Biddings.objects.filter(item_id=listing_id)
+    num_of_bids = len(biddings)
+    return render(request, 'auctions/listing.html', {
+        "listing": listing,
+        "biddings": biddings,
+        "user": user,
+        "numofbids": num_of_bids
     })
 
 
