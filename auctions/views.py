@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm
+from django import forms
 
 from .models import User, ListingPage, Biddings
 
@@ -45,18 +46,49 @@ def new_listing(request):
                 'form': form
     })
 
+class NewBidding(forms.Form):
+    bid_price = forms.IntegerField()
+
 @login_required(login_url='login')
 def listing(request, listing_id):
     user = request.user
     listing = ListingPage.objects.get(id=listing_id)
     biddings = Biddings.objects.filter(item_id=listing_id)
     num_of_bids = len(biddings)
+    bid_form = NewBidding()
     return render(request, 'auctions/listing.html', {
         "listing": listing,
         "biddings": biddings,
         "user": user,
-        "numofbids": num_of_bids
+        "numofbids": num_of_bids,
+        "form": bid_form
     })
+
+
+
+@login_required(login_url='login')
+def bidding(request, listing_id):
+    user = request.user
+    if request.method == 'POST':
+        max_bid = Biddings.objects.filter(item_id=listing_id).values('bidding').last()
+        bid_form = NewBidding(request.POST)
+        if bid_form.is_valid():
+            bid_price = int(bid_form.cleaned_data['bid_price'])
+            if max_bid is None:
+                startbid = ListingPage.objects.filter(id=listing_id).values('startbids').first().get('startbids')
+                if bid_price <= startbid:
+                    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+                else:
+                    new_bid = Biddings(item_id=ListingPage.objects.get(id=listing_id), bidder=User.objects.get(username=user), bidding=bid_price)
+                    new_bid.save()
+                    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+            elif not max_bid is None:
+                if bid_price <= max_bid:
+                    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+                else:
+                    new_bid = Biddings(item_id=ListingPage.objects.get(id=listing_id), bidder=User.objects.get(username=user), bidding=bid_price)
+                    new_bid.save()
+                    return HttpResponseRedirect(reverse("listing", args=[listing_id]))
 
 
 def login_view(request):

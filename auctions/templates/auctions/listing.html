@@ -1,7 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h1>{{ listing.title }}</h1>
+    <h1>No {{ listing.id }}: {{ listing.title }}</h1>
 
     <ul>
         <img src="{{ listing.imageurl }}" alt="item image">
@@ -24,5 +24,11 @@
     {% else %}
     <p>No bidding yet</p>
     {% endif %}
+
+    <form action="{% url 'bidding' listing.id %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit">
+    </form>
         
 {% endblock %}
